@@ -1,5 +1,8 @@
 spring:
   config:
-    import: optional:configserver:http://localhost:8888
+    import: optional:configserver:http://localhost:8888 #optional: fa sì che l'applicazione non vada in errore se il Config Server non è disponibile. Quindi è tollerante ai guasti.
   application:
     name: discovery-service
+    
+    
+    ## noi vogliamo recuperare la config da config server

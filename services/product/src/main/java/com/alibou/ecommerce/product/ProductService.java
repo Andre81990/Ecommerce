@@ -2,7 +2,6 @@ package com.alibou.ecommerce.product;
 
 import com.alibou.ecommerce.exception.ProductPurchaseException;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,11 +11,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+
 public class ProductService {
 
     private final ProductRepository repository;
     private final ProductMapper mapper;
+
+    public ProductService(ProductRepository repository, ProductMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
 
     public Integer createProduct(
             ProductRequest request

@@ -9,11 +9,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class CustomerService {
 
   private final CustomerRepository repository;
   private final CustomerMapper mapper;
+
+  public CustomerService(CustomerRepository repository, CustomerMapper mapper) {
+    this.repository = repository;
+    this.mapper = mapper;
+  }
 
   public String createCustomer(CustomerRequest request) {
     var customer = this.repository.save(mapper.toCustomer(request));

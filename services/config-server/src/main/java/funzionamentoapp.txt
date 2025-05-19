@@ -1,0 +1,105 @@
+Client (Browser/Applicazione Esterna): L'utente interagisce
+con l'applicazione e-commerce tramite un browser web
+o un'applicazione mobile.
+
+----------------------------------------------------------------------------------------------------
+API Gateway (Porta 8222):
+
+È il punto di ingresso unico per tutte le richieste provenienti dal client.
+Basato su Spring Cloud Gateway (spring.cloud.gateway).
+Configurato per il service discovery tramite Eureka (discovery.locator.enabled: true).
+Ciò significa che il Gateway interroga Eureka per scoprire le istanze disponibili dei vari microservizi.
+
+
+indica che il Gateway utilizzerà il load balancing fornito da Spring Cloud LoadBalancer per distribuire
+le richieste tra le diverse istanze dello stesso microservizio registrate su Eureka.
+
+----------------------------------------------------------------------------------------------------
+
+Discovery Service (Eureka, Porta 8761):
+
+L'API Gateway interroga Eureka per ottenere le informazioni necessarie per instradare le richieste.
+
+----------------------------------------------------------------------------------------------------
+Config Server (Porta 8888):
+
+Un servizio centralizzato per la gestione della configurazione di tutti i microservizi.
+import: optional:configserver:http://localhost:8888 nei file application.yml) recupera
+la sua configurazione dal Config Server all'avvio
+Questo permette di gestire le configurazioni in modo centralizzato
+e di aggiornarle senza dover riavviare i microservizi.
+----------------------------------------------------------------------------------------------------
+Customer (porta:8090)
+ La configurazione del order-application fa riferimento a http://localhost:8222/api/v1/customers,
+  indicando che l'ORDER-SERVICE (e probabilmente altri) comunicano con il CUSTOMER-SERVICE tramite
+   l'API Gateway
+server:
+  port: 8090
+spring:
+  data:
+    mongodb:
+      username: alibou
+      password: alibou
+      host: localhost
+      port: 27017
+      database: customer
+      authentication-database: admin
+
+
+
+customer uno-molti con oder
+
+ ----------------------------------------------------------------------------------------------------
+Product Service (Porta 8050)
+
+uno prodotto molti ordini
+----------------------------------------------------------------------------------------------------
+Order Service (Porta 8070)
+un pagamento un ordine
+un customer molti ordini
+un prodotto molti ordini
+piu orderline un ordine
+
+----------------------------------------------------------------------------------------------------
+
+Payment Service (Porta 8060)
+
+un pagamento un ordine
+
+----------------------------------------------------------------------------------------------------
+
+Notification Service (Porta 8040)---email
+
+Kafka Producer: Produce messaggi su Kafka (bootstrap-servers: localhost:9092) per eventi come la conferma di pagamento (paymentConfirmation). Utilizza JsonSerializer per serializzare i messaggi.
+Kafka Consumer: Consuma messaggi da Kafka (bootstrap-servers: localhost:9092, group-id: paymentGroup,orderGroup) per eventi come la conferma d'ordine (orderConfirmation) e la conferma di pagamento (paymentConfirmation). Utilizza JsonDeserializer e specifica i package fidati e il mapping dei tipi JSON.
+Email: È configurato per inviare email tramite un server SMTP locale (host: localhost, port: 1025).
+Utilizza un database MongoDB (host: localhost:27017, database: notification).
+
+
+Email: È configurato per inviare email tramite un server SMTP locale (host: localhost, port: 1025).
+
+----------------------------------------------------------------------------------------------------
+Kafka (Porta 9092)
+Un sistema di messaggistica distribuito utilizzato per la comunicazione asincrona tra i microservizi (in questo caso, per le notifiche di pagamento e d'ordine).
+
+
+Richiesta del Client: L'utente effettua un ordine tramite il browser o l'app. La richiesta (es. POST a /api/v1/orders) viene inviata all'API Gateway (porta 8222).
+
+Routing nel Gateway: L'API Gateway, basandosi sul percorso /api/v1/orders/**, instrada la richiesta all'ORDER-SERVICE. Il Gateway interroga Eureka per trovare un'istanza disponibile dell'ORDER-SERVICE e utilizza il load balancing se ce ne sono più di una.
+
+Elaborazione nell'Order Service:
+
+L'ORDER-SERVICE riceve la richiesta.
+Potrebbe aver bisogno di recuperare informazioni sul cliente. Per farlo, contatterà l'API Gateway (porta 8222) con una richiesta a /api/v1/customers/{customerId}. Il Gateway routerà questa richiesta al CUSTOMER-SERVICE (porta 8090).
+Potrebbe aver bisogno di recuperare informazioni sui prodotti nell'ordine. Contatterà l'API Gateway (porta 8222) con una richiesta a /api/v1/products/{productId}. Il Gateway routerà questa richiesta al PRODUCT-SERVICE (porta 8050).
+Una volta raccolte le informazioni necessarie, l'ORDER-SERVICE crea l'ordine nel suo database.
+Per elaborare il pagamento, l'ORDER-SERVICE contatterà l'API Gateway (porta 8222) con una richiesta a /api/v1/payments. Il Gateway routerà questa richiesta al PAYMENT-SERVICE (porta 8060).
+Elaborazione del Pagamento: Il PAYMENT-SERVICE elabora il pagamento e risponde all'ORDER-SERVICE.
+
+Notifica (Asincrona tramite Kafka):
+
+Se il pagamento ha successo, il PAYMENT-SERVICE potrebbe produrre un messaggio di paymentConfirmation su un topic Kafka.
+L'ORDER-SERVICE potrebbe anche produrre un messaggio di orderConfirmation su un altro topic Kafka quando l'ordine viene creato con successo.
+Il NOTIFICATION-SERVICE (porta 8040) consuma questi messaggi da Kafka (paymentGroup e orderGroup).
+Quando il NOTIFICATION-SERVICE riceve un messaggio di paymentConfirmation o orderConfirmation, invia una notifica all'utente (ad esempio, un'email tramite il server SMTP configurato).
+Risposta al Client: L'ORDER-SERVICE invia una risposta (tramite l'API Gateway) al client per indicare che l'ordine è stato creato con successo.

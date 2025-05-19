@@ -7,6 +7,8 @@ import com.alibou.ecommerce.product.PurchaseResponse;
 import java.math.BigDecimal;
 import java.util.List;
 
+
+//i dati o le info di cui abbiamo bisogno
 public record OrderConfirmation (
         String orderReference,
         BigDecimal totalAmount,

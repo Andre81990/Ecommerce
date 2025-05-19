@@ -15,3 +15,8 @@ management:
   tracing:
     sampling:
       probability: 1.0
+
+
+##Tutti i servizi si registrano su Eureka (che gira su localhost:8761) per farsi scoprire.
+#
+#Si collegano al Config Server per ottenere la configurazione centralizzata.

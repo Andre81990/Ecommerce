@@ -8,7 +8,8 @@ spring:
       host: localhost
       port: 27017
       database: notification
-      authentication-database: admin
+      authentication-database: admin  # è il database su cui Mongo autentica l’utente.
+##consumer
   kafka:
     consumer:
       bootstrap-servers: localhost:9092
@@ -29,7 +30,7 @@ spring:
         smtp:
           trust: "*"
         auth: true
-        starttls:
+        starttls:  #abilita StartTLS (cifratura email).
           enabled: true
         connectiontimeout: 5000
         timeout: 3000

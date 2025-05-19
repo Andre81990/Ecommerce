@@ -5,11 +5,11 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true
+          enabled: true #Significa che il Gateway può scoprire automaticamente i microservizi registrati
       routes:
         - id: customer-service
           uri: lb:http://CUSTOMER-SERVICE
-          predicates:
+          predicates: #Condizioni per attivare la rotta
             - Path=/api/v1/customers/**
         - id: order-service
           uri: lb:http://ORDER-SERVICE
@@ -27,3 +27,8 @@ spring:
           uri: lb:http://PAYMENT-SERVICE
           predicates:
             - Path=/api/v1/payments/**
+
+
+##È configurato per instradare le richieste verso i vari microservizi tramite Path e Eureka (il service discovery).
+#
+#lb: indica load balancing via Eureka.

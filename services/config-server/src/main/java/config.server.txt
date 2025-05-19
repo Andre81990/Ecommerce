@@ -1,0 +1,21 @@
+
+
+ è il servizio centrale per la configurazione distribuita. Ogni microservizio
+ (es. payment, order, product, ecc.) non ha più i suoi .yml locali, ma li recupera
+ dal Config Server al momento del boot.
+
+ Customer
+
+ Order
+
+ Product
+
+ Payment
+
+ Notification
+
+
+ Questi servizi non leggono application.yml
+ localmente, ma da un repository gestito dal
+ Config Server (che può essere Git o file system locale,
+ come nel tuo esempio).

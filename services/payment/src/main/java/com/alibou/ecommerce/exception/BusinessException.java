@@ -8,4 +8,12 @@ import lombok.EqualsAndHashCode;
 public class BusinessException extends RuntimeException {
 
   private final String msg;
+
+  public String getMsg() {
+    return msg;
+  }
+
+  public BusinessException(String msg) {
+    this.msg = msg;
+  }
 }

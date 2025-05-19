@@ -27,6 +27,9 @@ public class OrderService {
     private final CustomerClient customerClient;
     private final PaymentClient paymentClient;
     private final ProductClient productClient;
+
+
+
     private final OrderLineService orderLineService;
     private final OrderProducer orderProducer;
 
@@ -35,10 +38,25 @@ public class OrderService {
         var customer = this.customerClient.findCustomerById(request.customerId())
                 .orElseThrow(() -> new BusinessException("Cannot create order:: No customer exists with the provided ID"));
 
+
+
+        /*
+        * Questo metodo si occupa di inviare una richiesta al product-service,
+        *  utilizzando RestTemplate. La richiesta contiene una lista di prodotti
+        * (request.products()) che l'utente vuole acquistare
+        *
+        * */
         var purchasedProducts = productClient.purchaseProducts(request.products());
 
+        //persist order
         var order = this.repository.save(mapper.toOrder(request));
 
+
+
+        /*Creazione delle righe dell'ordine:
+
+Il metodo quindi salva ogni ordine con le rispettive righe
+ dell'ordine (prodotti acquistati) usando il servizio orderLineService.*/
         for (PurchaseRequest purchaseRequest : request.products()) {
             orderLineService.saveOrderLine(
                     new OrderLineRequest(
@@ -58,6 +76,7 @@ public class OrderService {
         );
         paymentClient.requestOrderPayment(paymentRequest);
 
+        //kafka
         orderProducer.sendOrderConfirmation(
                 new OrderConfirmation(
                         request.reference(),
@@ -71,6 +90,10 @@ public class OrderService {
         return order.getId();
     }
 
+
+
+
+//Quindi: trasforma ogni Order in un OrderResponse.
     public List<OrderResponse> findAllOrders() {
         return this.repository.findAll()
                 .stream()

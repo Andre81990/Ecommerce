@@ -4,11 +4,11 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/payment
-    username: alibou
-    password: alibou
+    username: postgres
+    password: Borraco1990
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate #create
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
@@ -22,3 +22,6 @@ spring:
 application:
   config:
     product-url: http://localhost:8222/api/v1/products
+
+
+##Kafka serializza oggetti PaymentNotificationRequest come JSON.

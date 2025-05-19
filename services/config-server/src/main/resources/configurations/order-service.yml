@@ -2,16 +2,16 @@ server:
   port: 8070
 spring:
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/order
-    username: alibou
-    password: alibou
+    driver-class-name: org.postgresql.Driver #    url: jdbc:postgresql://localhost:5432/order
+    url: jdbc:postgresql://localhost:5432/order #jdbc:postgresqllocalhost://:5432/order
+    username: postgres
+    password: Borraco1990
   jpa:
     hibernate:
       ddl-auto: create
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-  kafka:
+  kafka:  ##kafka
     producer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
